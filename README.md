@@ -29,7 +29,7 @@ registered correctly on the server, here is your `websocketId`.
 - A user initiates a DM request to another user.
 - The client sends a message to the server over the websocket connection that
 includes the current `channelId`, the client's `userId`, and the
-client's `websocketId`, and the message `code`
+client's `websocketId`, and the `message code`
 - A DM channel is 2 user id's concatanted together by a `.`. So a DM channel
 looks like `userId1.userId2`. The 2nd userId (`userId2`) is the receiving user.
 The first userId (`userId1`) is the sending user.
