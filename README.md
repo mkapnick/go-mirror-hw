@@ -28,18 +28,17 @@ acknowledgment (`ACK`) to the client which basically says: hey, you are now
 registered correctly on the server, here is your `websocketId`.
 - A user initiates a DM request to another user.
 - The client sends a message to the server over the websocket connection that
-includes the current `channelId`, the client's `userId`, and the
-client's `websocketId`, and the `message code`
+includes the `channelId` (the `channelId` is formed on the client to contain both `userIds`), 
+the client's `userId`, and the client's `websocketId`, and the `message code`
 - A DM channel is 2 user id's concatanted together by a `.`. So a DM channel
 looks like `userId1.userId2`. The 2nd userId (`userId2`) is the receiving user.
 The first userId (`userId1`) is the sending user.
 - The server receives this message and recognizes that it's a DM request from
-the `code`.
+the `message code`.
 - The server loops through all the websocket clients, and checks to see if
 the client `userId` matches `userId2`. If it matches then the server knows
 to relay this message to that client over that particular websocket connection.
-The server then relays the message over the ws connection with a specific `code`
+The server then relays the message over the ws connection with a specific `message code`
 `subscribe.direct`.
-- The client listens for incoming messages on the ws, sees the incoming message
+- The client listens for incoming messages on the ws, sees the incoming `message code`
 of type `subscribe.direct`, and displays the message to that user.
-
