@@ -42,3 +42,9 @@ The server then relays the message over the ws connection with a specific `messa
 `subscribe.direct`.
 - The client listens for incoming messages on the ws, sees the incoming `message code`
 of type `subscribe.direct`, and displays the message to that user.
+
+## Pubnub
+- Pubnub is used to subscribe users to channels, to send messages into
+channels, and to receive messages from channels. My code wraps around Pubnub
+to handle which users should subscribe to what channel and what messages
+they should send and receive from a channel.
