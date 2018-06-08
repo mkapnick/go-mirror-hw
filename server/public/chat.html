@@ -1,0 +1,336 @@
+<html>
+  <style>
+    .channels {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .channel-container {
+      margin: 1rem;
+      padding: 1rem;
+      border: 1px solid pink;
+    }
+
+    .channel-chat-box {
+      position: relative;
+      width: 500px;
+      height: 200px;
+      background: #e7e7e7;
+      overflow: scroll;
+    }
+
+    .message {
+      padding: .5rem;
+      margin: 1rem 1rem .25rem 1rem;
+      background: pink;
+    }
+
+    .message-mine {
+      padding: .5rem;
+      margin: 1rem 1rem .25rem 1rem;
+      text-align: right;
+      background: #8acff0;
+    }
+
+    .channel-input {
+      margin: 1rem 1rem 0 0;
+    }
+
+    .intro {
+      width: 500px;
+      margin: 2rem auto 4rem auto;
+      text-align: center;
+    }
+
+    .instructions {
+      width: 600px;
+      margin: 2rem auto 4rem auto;
+    }
+  </style>
+  <body>
+    <div class="instructions">
+      Instructions:
+      <ol>
+        <li>Check the console</li>
+        <li>Your personal user id can be used in another window to Direct Message you</li>
+        <li>Your personal channel id is a public channel, and anyone can join it
+          and start messaging on that channel</li>
+      </ol>
+    </div>
+    <div class="intro">
+      <h4>Enter Channel id: (group message)</h4>
+      <div>
+        <input id="input-channelId" placeholder="channel id" />
+        <button class="btnChannelNew">Start chat</button>
+      </div>
+      <h4>Enter User id: (direct message)</h4>
+      <div>
+        <input id="input-userId" placeholder="user id" />
+        <button class="btnDirectNew">Start chat</button>
+      </div>
+    </div>
+
+    <br />
+
+    <div id="channels" class="channels">
+      <div class="channel-container">
+        <div class="channel-chat-box" id="chat-box-mine">
+          <div class="channel-title">Your channel</div>
+        </div>
+        <div class="channel-input">
+          Chat: <input id="channel-input-mine" size="50" placeholder="Say something (to yourself)" />
+        </div>
+      </div>
+    </div>
+
+    <script src="http://cdn.pubnub.com/pubnub.min.js"></script>
+
+    <script>
+      // initialize window.pubnub
+      window.pubnub = PUBNUB.init({
+        publish_key: 'pub-c-fb3eb6cd-69f8-4418-9902-77e337caea23',
+        subscribe_key: 'sub-c-b760d518-682a-11e8-80d3-e2460f47e7ae',
+        ssl: true
+      });
+
+      // this will get filled in `getUserInfo`
+      window.userInfo = {
+        ChannelId: null,
+        UserId: null,
+        Username: null,
+        WebsocketId: null,
+      };
+
+      // websocket initialization
+      window.ws = {};
+
+      var btnChannelNew = document.querySelector('.btnChannelNew');
+      var btnDirectNew = document.querySelector('.btnDirectNew');
+
+      btnDirectNew.addEventListener('click', function(e) {
+        console.log('btn direct message click');
+        // get the channel id value
+        var inputEl = PUBNUB.$('input-userId');
+        // direct messages are formatted like this: userId.userId
+        // with this protocol we can check the user id against this and
+        // determine if this user should see the message or not
+        var channelId = window.userInfo.UserId + '.' + inputEl.value;
+
+        console.log('sending direct message inquiry to server', {
+          code: 'message.direct',
+          websocketId: window.userInfo.WebsocketId,
+          userId: window.userInfo.UserId,
+          channel: ""+window.userInfo.UserId +"" + '.' + ""+inputEl.value+""
+        });
+
+        // user is initiating a DM to another user. let the server know
+        // know about it first
+        window.ws.send(JSON.stringify({
+          code: 'message.direct',
+          websocketId: window.userInfo.WebsocketId,
+          userId: window.userInfo.UserId,
+          channel: window.userInfo.UserId + '.' + inputEl.value
+        }));
+
+        var channelsEl = PUBNUB.$('channels');
+
+        // create the new channel box
+        var el = document.createElement('div');
+        el.className = 'channel-container';
+        var elString = '<div class="channel-chat-box" id=chat-box-'+channelId+'><div class="channel-title">Direct message: '+channelId+'</div></div><div class="channel-input">Chat: <input id='+channelId+' size="50" placeholder="Say something"/></div>';
+        el.innerHTML = elString;
+        channelsEl.appendChild(el);
+
+        // subscribe this user to the channel with window.pubnub and update the
+        // channel with messages as they come in
+        window.pubnub.subscribe({
+          channel: channelId,
+          callback: function(message) {
+            var chatBoxEl = PUBNUB.$('chat-box-'+channelId);
+            var el = document.createElement('div');
+            el.className = 'message';
+            if(message.userId === window.userInfo.UserId) {
+              el.className = 'message-mine';
+            }
+            // use the id as the username for now
+            var username = message.username;
+            el.innerHTML = '<span>'+username+': '+message.value+'</span>';
+            chatBoxEl.appendChild(el);
+          }
+        });
+
+        registerInputs();
+      });
+
+      btnChannelNew.addEventListener('click', function(e) {
+        console.log('btn channel new click');
+        // get the channel id value
+        var inputEl = PUBNUB.$('input-channelId');
+        var channelId = inputEl.value
+        var channelsEl = PUBNUB.$('channels');
+
+        // create the new channel box
+        var el = document.createElement('div');
+        el.className = 'channel-container';
+        var elString = '<div class="channel-chat-box" id=chat-box-'+channelId+'><div class="channel-title">Channel: '+channelId+'</div></div><div class="channel-input">Chat: <input id='+channelId+' size="50" placeholder="Say something"/></div>';
+        el.innerHTML = elString;
+        channelsEl.appendChild(el);
+
+        // subscribe to the channel with window.pubnub and update the channel with
+        // messages as they come in
+        window.pubnub.subscribe({
+          channel: channelId,
+          callback: function(message) {
+            var chatBoxEl = PUBNUB.$('chat-box-'+channelId);
+            var el = document.createElement('div');
+            el.className = 'message';
+            if(message.userId === window.userInfo.UserId) {
+              el.className = 'message-mine';
+            }
+            // use the id as the username for now
+            var username = message.username;
+            el.innerHTML = `<span>${username}: ${message.value}</span>`;
+            chatBoxEl.appendChild(el);
+          }
+        });
+
+        registerInputs();
+      });
+
+      function getUserInfo() {
+        console.log('fetching `/me`');
+        return fetch('/me', {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Cache': 'no-cache'
+          },
+          // need this parameter in order to include the jwt token
+          // on the request
+          credentials: 'include'
+        })
+        .then(function(response) {
+          return response.json();
+        })
+        .then(function(response) {
+          // update `window.userInfo`
+          window.userInfo.UserId = response.UserId;
+          window.userInfo.ChannelId = response.ChannelId;
+          window.userInfo.Username = response.Username;
+          console.log('user info initialized correctly', userInfo);
+          return;
+        })
+        .then(function() {
+          setTimeout(() => {
+            // send the server the userId
+            console.log('sending server the user id to associate with the ws', {
+              code: 'register.userId',
+              websocketId: window.userInfo.WebsocketId,
+              userId: window.userInfo.UserId
+            });
+
+            ws.send(JSON.stringify({
+              code: 'register.userId',
+              websocketId: window.userInfo.WebsocketId,
+              userId: window.userInfo.UserId
+            }));
+          }, 2000);
+        })
+        .catch(function(err) {
+          console.log('error fetching /me', err);
+        })
+      }
+
+      // request user info from the server
+      getUserInfo()
+      .then(function() {
+        // all of these must be non-null to be considered valid
+        if(!(window.userInfo.ChannelId && window.userInfo.UserId && window.userInfo.Username)) {
+          console.log('Error initializing client, aborting');
+          console.error('Error initializing client, aborting');
+          return;
+        }
+
+        console.log('personal channel id:', window.userInfo.ChannelId);
+        console.log('personal user id:', window.userInfo.UserId);
+
+        // the user is automatically opted in to listen to his/her own
+        // direct channel - subscribe to the channel, and update with messages
+        // as they come in
+        window.pubnub.subscribe({
+          channel: window.userInfo.ChannelId,
+          callback: function(message, env, channel) {
+            var chatBoxEl = PUBNUB.$('chat-box-mine');
+            var el = document.createElement('div');
+            el.className = 'message-mine';
+            el.innerHTML = `<span>${message.value}</span>`;
+            chatBoxEl.appendChild(el);
+          }
+
+        });
+        console.log('client initialized correctly');
+        return;
+      })
+      .then(function() {
+        // register inputs (on enter)
+        registerInputs();
+      });
+
+      function registerInputs() {
+        // find all inputs and register keyup events
+        var inputs = document.querySelectorAll('input');
+
+        //  cycle over text inputs to bind the enter key
+        inputs.forEach(input => {
+          let ok = true;
+
+          // skip these inputs
+          if(input.id === 'input-channelId' || input.id === 'input-userId') {
+            ok = false;
+          }
+
+          if(ok) {
+            input.addEventListener('keypress', function (e) {
+              var key = e.which || e.keyCode;
+              var id = input.id;
+              var channelId = id;
+
+              if(id === 'channel-input-mine') {
+                channelId = window.userInfo.ChannelId;
+              }
+
+              // abort if no message to send
+              if(!input.value.length) {
+                return;
+              }
+
+              // code for enter
+              if (key === 13) {
+                console.log('sending message to channel', channelId, {
+                  channel: channelId,
+                  message: {
+                    value: input.value,
+                    userId: window.userInfo.UserId,
+                    channel: window.userInfo.ChannelId,
+                    username: window.userInfo.Username
+                  }
+                });
+                window.pubnub.publish({
+                  channel: channelId,
+                  message: {
+                    value: input.value,
+                    userId: window.userInfo.UserId,
+                    username: window.userInfo.Username,
+                    channel: window.userInfo.ChannelId,
+                  },
+                  x: input.value=''
+                });
+              }
+            });
+          }
+        });
+      }
+    </script>
+    <script src="./ws.js"></script>
+  </body>
+</html>
