@@ -1,4 +1,5 @@
 ## Running locally
+- `dep ensure`
 - `cd server`
 - `GOOS=linux go build -o main`
 - `docker run -p 9000:9000 go-mirror`

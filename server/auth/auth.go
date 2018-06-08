@@ -158,11 +158,11 @@ func AuthLogin(w http.ResponseWriter, r *http.Request) {
 	// create a signer for rsa 256
 	token := jwt.NewWithClaims(jwt.GetSigningMethod("RS256"), &UserInfo{
 		// userId
-		uuid.Must(uuid.NewV4()).String(),
+		uuid.Must(uuid.NewV4(), nil).String(),
 		// username
 		username,
 		// channelId
-		uuid.Must(uuid.NewV4()).String(),
+		uuid.Must(uuid.NewV4(), nil).String(),
 		// expiration
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 72).Unix(),

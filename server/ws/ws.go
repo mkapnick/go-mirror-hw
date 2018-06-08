@@ -41,7 +41,7 @@ func HandleConnections(ws *websocket.Conn) {
 		fmt.Println("adding new client to connection pool")
 		var client *Client = &Client{
 			Connection:  ws,
-			WebsocketId: uuid.Must(uuid.NewV4()).String(),
+			WebsocketId: uuid.Must(uuid.NewV4(), nil).String(),
 		}
 		clients[ws] = client
 
