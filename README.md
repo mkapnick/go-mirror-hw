@@ -34,11 +34,11 @@ client's `websocketId`, and the message `code`
 looks like `userId1.userId2`. The 2nd userId (`userId2`) is the receiving user.
 The first userId (`userId1`) is the sending user.
 - The server receives this message and recognizes that it's a DM request from
-the code.
+the `code`.
 - The server loops through all the websocket clients, and checks to see if
-the client userId matches `userId2`. If it matches then the server knows
+the client `userId` matches `userId2`. If it matches then the server knows
 to relay this message to that client over that particular websocket connection.
-Te server then sends a message over the ws connection with a specific code
+The server then relays the message over the ws connection with a specific `code`
 `subscribe.direct`.
 - The client listens for incoming messages on the ws, sees the incoming message
 of type `subscribe.direct`, and displays the message to that user.
