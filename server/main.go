@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/mkapnick/go-mirror/server/auth"
-	"github.com/mkapnick/go-mirror/server/html"
-	"github.com/mkapnick/go-mirror/server/routes"
-	"github.com/mkapnick/go-mirror/server/ws"
+	"github.com/mkapnick/go-mirror-hw/server/auth"
+	"github.com/mkapnick/go-mirror-hw/server/html"
+	"github.com/mkapnick/go-mirror-hw/server/routes"
+	"github.com/mkapnick/go-mirror-hw/server/ws"
 	"golang.org/x/net/websocket"
 	"net/http"
 )

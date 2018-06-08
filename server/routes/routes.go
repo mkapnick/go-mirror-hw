@@ -3,7 +3,7 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mkapnick/go-mirror/server/auth"
+	"github.com/mkapnick/go-mirror-hw/server/auth"
 	"net/http"
 	"os"
 )

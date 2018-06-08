@@ -2,7 +2,7 @@ package ws
 
 import (
 	"fmt"
-	"github.com/mkapnick/go-mirror/server/auth"
+	"github.com/mkapnick/go-mirror-hw/server/auth"
 	"github.com/satori/go.uuid"
 	"golang.org/x/net/websocket"
 	"strings"
